@@ -1,0 +1,47 @@
+#include <stdio.h>
+#include <string.h>
+// Nested structure for Blood Pressure
+struct blood_pressure {
+    int systolic;
+    int diastolic;
+};
+// Nested structure for Date
+struct date {
+    int day;
+    int month;
+    int year;
+};
+struct patient {
+    char name[100];
+    int age;
+    char phone[15];  
+    struct blood_pressure bp;
+    struct date visit_date;
+};
+void addPatient(struct patient *p, char n[], int a, char ph[], int sys, int dia, int d, int m, int y) {
+    strcpy(p->name, n);
+    p->age = a;
+    strcpy(p->phone, ph);
+    p->bp.systolic = sys;
+    p->bp.diastolic = dia;
+    p->visit_date.day = d;
+    p->visit_date.month = m;
+    p->visit_date.year = y;
+}
+
+int main() {
+    struct patient register_list[100];
+    int count = 0;
+ 
+    addPatient(&register_list[count], "John Doe", 30, "9876543210", 120, 80, 15, 10, 2026);
+    count++;
+    printf("Patient Name: %s\n", register_list[0].name);
+    printf("Age: %d\n", register_list[0].age);
+    printf("Phone: %s\n", register_list[0].phone);
+    printf("BP: %d/%d\n", register_list[0].bp.systolic, register_list[0].bp.diastolic);
+    printf("Visit Date: %02d/%02d/%d\n", register_list[0].visit_date.day, 
+                                         register_list[0].visit_date.month, 
+                                         register_list[0].visit_date.year);
+
+    return 0;
+}
