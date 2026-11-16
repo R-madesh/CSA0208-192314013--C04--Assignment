@@ -1,0 +1,64 @@
+#include <stdio.h>
+int global_counter = 1000;
+/* (a) Automatic local variable */
+int next_token_auto(void)
+{
+    int counter = 1000;
+    counter++;
+    return counter;
+}
+
+/* (b) Static local variable */
+int next_token(void)
+{
+    static int counter = 1000;
+    counter++;
+    return counter;
+}
+
+/* (c) Global variable version */
+int next_token_global(void)
+{
+    global_counter++;
+    return global_counter;
+}
+
+/* Task 5.2: two separate counters (veg and non-veg) using static */
+int next_token_type(int is_veg)
+{
+    static int veg = 1000;
+    static int nonveg = 5000;
+    if (is_veg)
+        return ++veg;
+    else
+        return ++nonveg;
+}
+
+int main(void)
+{
+    register int i;
+
+    printf("(a) Automatic:\n");
+    for (i = 0; i < 3; i++)
+        printf("Token: %d\n", next_token_auto());
+
+    printf("\n(b) Static:\n");
+    for (i = 0; i < 3; i++)
+        printf("Token: %d\n", next_token());
+
+    printf("\n(c) Global:\n");
+    for (i = 0; i < 3; i++)
+        printf("Token: %d\n", next_token_global());
+
+    printf("\n(d) Register loop variable with static counter:\n");
+    for (i = 0; i < 3; i++)
+        printf("Token: %d\n", next_token());
+
+    printf("\nTask 5.2 - Veg and Non-veg counters:\n");
+    printf("Veg: %d\n", next_token_type(1));
+    printf("Veg: %d\n", next_token_type(1));
+    printf("Non-veg: %d\n", next_token_type(0));
+    printf("Non-veg: %d\n", next_token_type(0));
+
+    return 0;
+}
