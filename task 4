@@ -1,0 +1,41 @@
+#include <stdio.h>
+
+struct account {
+    int number;
+    float balance;
+};
+
+/* Task 4.2 - Evidence: shows the address inside a function that gets a COPY */
+void addInterestWrong(struct account a, float rate) {
+    printf("Address inside addInterestWrong(): %p\n", (void*)&a);
+    a.balance = a.balance + a.balance * rate / 100;   /* changes only the copy */
+}
+
+/* Task 4.3 - Repair: uses a pointer and the arrow operator */
+void addInterest(struct account *a, float rate) {
+    a->balance = a->balance + a->balance * rate / 100;
+}
+
+int main(void) {
+    struct account list[3] = {{101, 5000}, {102, 12000}, {103, 800}};
+    struct account *p = list;
+    int i;
+
+    /* ---------- Task 4.2: Prove the defect ---------- */
+    printf("=== Task 4.2: Evidence (pass by value) ===\n");
+    for (i = 0; i < 3; i++) {
+        printf("Address in main():                 %p\n", (void*)&list[i]);
+        addInterestWrong(list[i], 4);
+        printf("Balance after call: %.2f (unchanged)\n\n", list[i].balance);
+    }
+
+    /* ---------- Task 4.3: Repaired program ---------- */
+    printf("=== Task 4.3: Repaired Program ===\n");
+    for (i = 0; i < 3; i++)
+        addInterest(&list[i], 4);          
+
+    for (i = 0; i < 3; i++)
+        printf("%d %.2f\n", (p + i)->number, (p + i)->balance);   
+
+    return 0;
+}
