@@ -1,0 +1,106 @@
+#include <stdio.h>
+struct date { int day, month, year; };
+struct time { int hour, minute; };
+enum kind { PACKAGED, COOKED, COMBO };
+struct item {
+    int id;
+    char name[30];
+    float price;
+    int stock;
+    float revenue;
+    enum kind type;               
+    union {
+        struct date expiry;       
+        struct time prepared;     
+        int parts[3];             
+    } u;
+};
+long date_to_days(struct date d)
+{
+    return d.year * 365L + d.month * 30L + d.day;
+}
+ 
+int record_sale(struct item *it, int qty)
+{
+    if (qty <= 0 || qty > it->stock) {
+        printf("SALE REJECTED: %s (requested %d, stock %d)\n",
+               it->name, qty, it->stock);
+        return 0;
+    }
+    it->stock = it->stock - qty;
+    it->revenue = it->revenue + qty * it->price;
+    printf("Sold %d x %s = Rs.%.2f (stock left %d)\n",
+           qty, it->name, qty * it->price, it->stock);
+    return 1;
+}
+void expiry_warning(struct item list[], int n, struct date today)
+{
+    int i;
+    long left;
+    for (i = 0; i < n; i++) {
+        if (list[i].type == PACKAGED) {
+            left = date_to_days(list[i].u.expiry) - date_to_days(today);
+            if (left <= 2)
+                printf("WARNING: %s expires in %ld day(s)\n",
+                       list[i].name, left);
+        }
+    }
+}
+void sort_by_revenue(struct item list[], int n)
+{
+    int i, j, max;
+    struct item temp;
+    for (i = 0; i < n - 1; i++) {
+        max = i;
+        for (j = i + 1; j < n; j++)
+            if (list[j].revenue > list[max].revenue)
+                max = j;
+        if (max != i) {
+            temp = list[i];
+            list[i] = list[max];
+            list[max] = temp;
+        }
+    }
+}
+void print_summary(struct item list[], int n)
+{
+    int i;
+    float total = 0;
+    printf("\n------ DAY'S BILL SUMMARY (sorted by revenue) ------\n");
+    printf("%-15s %-10s %-8s\n", "Item", "Revenue", "Stock");
+    for (i = 0; i < n; i++) {
+        printf("%-15s Rs.%-7.2f %-8d\n",
+               list[i].name, list[i].revenue, list[i].stock);
+        total = total + list[i].revenue;
+    }
+    printf("Total Revenue: Rs.%.2f\n", total);
+}
+
+int main(void)
+{
+    struct date today = {12, 10, 2026};
+    int n = 4;
+
+    struct item menu[4] = {
+        {1, "Biscuits",   20.0f, 10, 0, PACKAGED, .u.expiry   = {13, 10, 2026}},
+        {2, "Juice",      35.0f,  8, 0, PACKAGED, .u.expiry   = {30, 10, 2026}},
+        {3, "Samosa",     15.0f, 20, 0, COOKED,   .u.prepared = {9, 30}},
+        {4, "Meal Combo", 80.0f,  5, 0, COMBO,    .u.parts    = {1, 2, 3}}
+    };
+
+    printf("=== NORMAL SALES ===\n");
+    record_sale(&menu[0], 3);    
+    record_sale(&menu[2], 10);   
+    record_sale(&menu[3], 2);    
+
+    printf("\n=== SALE EXCEEDING STOCK ===\n");
+    record_sale(&menu[1], 12);   
+
+    printf("\n=== EXPIRY WARNINGS ===\n");
+    expiry_warning(menu, n, today);
+
+    sort_by_revenue(menu, n);
+    print_summary(menu, n);
+
+    return 0;
+}
